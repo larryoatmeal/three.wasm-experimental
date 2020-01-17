@@ -1,5 +1,4 @@
 #/bin/bash
-export EMCC_FORCE_STDLIBS=
 export EMCC_ONLY_FORCED_STDLIBS=1
 emcc \
 	-Os\
