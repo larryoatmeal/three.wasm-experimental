@@ -263,7 +263,7 @@ void WebGLRenderer::renderObject(
 	}
 
 	if(this->currentGeometry != geometry) {
-		auto geometry_attribute_elements = mesh->geometry->attributes.elements;
+		polygon_vec<BufferAttribute *> geometry_attribute_elements = mesh->geometry->attributes.elements;
 		for(int i = 0; i < geometry_attribute_elements.size(); i++){
 			glBindBuffer(GL_ARRAY_BUFFER, this->attributes->get(geometry_attribute_elements[i]).buffer);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);

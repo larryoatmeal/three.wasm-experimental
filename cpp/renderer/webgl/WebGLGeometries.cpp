@@ -11,7 +11,7 @@ void WebGLGeometries::update(
 		this->attributes->update(geometry->index, GL_ELEMENT_ARRAY_BUFFER);
 	}
 
-	auto geometry_attribute_elements = geometry->attributes.elements;
+	polygon_vec<BufferAttribute*> geometry_attribute_elements = geometry->attributes.elements;
 	for(unsigned int i = 0; i < geometry_attribute_elements.size(); i++){
 		this->attributes->update(geometry_attribute_elements[i], GL_ARRAY_BUFFER);
 	}
