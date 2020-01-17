@@ -11,6 +11,17 @@ This is a standalone WASM version that has no dependencies on emscripten JS glue
 ```
 * Must have emcc installed (v1.39.5)
 
+## EMCC flags
+There are some important flags/environment variables to pay attention to.
+
+* Disable all stdlibs
+```
+export EMCC_ONLY_FORCED_STDLIBS=1
+```
+* Disable unneeded features
+```
+-fno-exceptions -fno-rtti -s ERROR_ON_UNDEFINED_SYMBOLS=0
+```
 
 ## TODO
 
