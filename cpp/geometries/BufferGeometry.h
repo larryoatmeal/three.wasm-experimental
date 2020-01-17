@@ -3,8 +3,6 @@
 
 
 #include "../my_std/map.hpp"
-// #include <map>
-// #include <string>
 #include "../core/BufferAttribute.h"
 #include "../math/Sphere.h"
 #include "../math/Box3.h"

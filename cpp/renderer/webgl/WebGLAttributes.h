@@ -1,7 +1,6 @@
 ﻿#ifndef __THREE_WEBGL_ATTRIBUTES__
 #define __THREE_WEBGL_ATTRIBUTES__
 
-// #include <map>
 #include <GLES2/gl2.h>
 #include "../../core/BufferAttribute.h"
 #include "../../my_std/map.hpp"

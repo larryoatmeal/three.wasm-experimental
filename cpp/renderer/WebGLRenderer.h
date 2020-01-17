@@ -1,8 +1,6 @@
 ﻿#ifndef __THREE_WEBGLRENDERER_H__
 #define __THREE_WEBGLRENDERER_H__
 
-// #include <stdio.h>
-// #include <stdlib.h>
 #include <GLES2/gl2.h>
 #include <vector>
 #include "../my_std/map.hpp"

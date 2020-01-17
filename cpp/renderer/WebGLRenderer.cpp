@@ -1,5 +1,4 @@
 ﻿#include <stdlib.h>
-// #include <algorithm>
 #include "WebGLRenderer.h"
 bool validEmscriptenResult(
 	EMSCRIPTEN_RESULT result
@@ -338,7 +337,7 @@ WebGLRenderer* WebGLRenderer::render(
 	this->projectObject(scene, camera);
 
 	//use custom sorting algorithm
-	
+
 
 	// std::sort(this->currentRenderList.begin(), this->currentRenderList.end(),
 	// 	painterSort());

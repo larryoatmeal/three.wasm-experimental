@@ -1,8 +1,6 @@
 #ifndef __THREE_MAP__
 #define __THREE_MAP__
 
-// #include <vector>
-
 #include "vec.hpp"
 #include "../js_external.h"
 
