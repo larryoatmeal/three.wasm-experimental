@@ -5,7 +5,7 @@ MeshBasicMaterial::MeshBasicMaterial() {
 }
 
 MeshBasicMaterial::MeshBasicMaterial(
-	Vector3 *_color
+	Vector3 _color
 ) {
-	this->color.copy(_color);
+	this->color.copy(&_color);
 }

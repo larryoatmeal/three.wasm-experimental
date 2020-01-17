@@ -13,13 +13,15 @@
 	</head>
 	<body>
 		<script src="three/three.r98.wasm.js"></script>
-		<script src="three-wasm.js"></script>
+		<!-- <script src="three-wasm.js"></script> -->
 		<script src="libs/stats.min.js"></script>
 		<script src="libs/dat.gui.min.js"></script>
 
 		<script>
 
-			var useWasm = location.href.indexOf( 'index_js.html' ) < 0;
+		(async function(){
+
+			var useWasm = true;
 			var objectNum = 1000;
 			var distance = 100.0;
 			var animationEnabled = true;
@@ -63,14 +65,84 @@
 
 			}
 
-			setTimeout( function () {
+			let wasmStream = await fetch("three-wasm.wasm");
+			let wasmBytes = await wasmStream.arrayBuffer();
+			let method_names =["glGetShaderiv","_ZNKSt3__220__vector_base_commonILb1EE20__throw_length_errorEv","glBindBuffer","glGetUniformLocation","glUniformMatrix4fv","glClearColor","glAttachShader","emscripten_webgl_make_context_current","emscripten_webgl_create_context","glGetShaderInfoLog","glCompileShader","glShaderSource","glCreateShader","glDrawElements","glBufferData","tan","glGenBuffers","glCullFace","glEnable","glUniform3fv","glEnableVertexAttribArray","glVertexAttribPointer","glUseProgram","glClear","glViewport","glDeleteProgram","glGetProgramInfoLog","glGetProgramiv","glLinkProgram","glBindAttribLocation","glCreateProgram","glDeleteShader","proc_exit"]
 
-				initGui();
-				initModule();
+			let methods = {};
+			for(let i = 0; i < method_names.length; i++){
+				methods[method_names[i]] = () => {
+					// console.log(method_names[i] + " " + "called")
+				}
+			}
+
+			methods["console_log"] = (code) => {
+				console.log(code);
+
+				// if(code == ){
+				// 	// throw new Error("MAP KEY NOT FOUND");
+				// 	console.log("MAP KEY NOT FOUND");
+				// }else{
+				// 	console.log(code);
+				// }
+			}
+			methods["console_error"] = (code) => {
+				console.log(code);
+
+				if(code == 0){
+					throw new Error("NO CONTEXT");
+				}
+				// if(code == ){
+				// 	// throw new Error("MAP KEY NOT FOUND");
+				// 	console.log("MAP KEY NOT FOUND");
+				// }else{
+				// 	console.log(code);
+				// }
+			}
+
+			methods["glCreateProgram"] = (code) => {
+				return 1;
+			}
+			// methods["emscripten_webgl_make_context_current"] = (code) => {
+			// 	return 1;
+			// }
+			methods["emscripten_webgl_create_context"] = (code) => {
+				return 1;
+			}
+
+			console.log(methods);
+
+			/**
+			INIT WASM
+			*/
+
+			let {instance, module} = await WebAssembly.instantiate(wasmBytes, {
+					"env": methods,
+					"wasi_snapshot_preview1": methods
+				});
+			console.log(instance);
+
+			let memory = instance.exports.memory;
+			let HEAP_RAW_BUFFER = memory.buffer;
+			let HEAP_CHAR = new Uint8Array(memory.buffer);
+			let HEAP_DOUBLE = new Float64Array(memory.buffer);
+			initGui();
+
+
+
+
+			let WASM = instance.exports;
+
+			setTimeout(() => {
 				init();
 				animate();
+			})
 
-			}, 1000 );
+
+
+			/**
+			*/
+
 
 			var renderer, scene, camera;
 			var stats = new Stats();
@@ -96,7 +168,7 @@
 					'update': function () {
 						location.href = 'index' +
 							( api.platform === 'JavaScript' ? '_js' : '' ) +
-							'.html?' + 
+							'.html?' +
 							'num=' + api.num +
 							'&distance=' + api.distance +
 							'&animation=' + api.animation +
@@ -113,163 +185,6 @@
 
 			}
 
-			function initModule() {
-
-				console.log( Module );
-
-				Module.functions = {};
-
-				Module.functions.sizeOfVector3 = Module.cwrap(
-					'sizeOfVector3',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfBufferAttribute = Module.cwrap(
-					'sizeOfBufferAttribute',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfBufferGeometry = Module.cwrap(
-					'sizeOfBufferGeometry',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfObject3D = Module.cwrap(
-					'sizeOfObject3D',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfMesh = Module.cwrap(
-					'sizeOfMesh',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfMeshBasicMaterial = Module.cwrap(
-					'sizeOfMeshBasicMaterial',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfScene = Module.cwrap(
-					'sizeOfScene',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfPerspectiveCamera = Module.cwrap(
-					'sizeOfPerspectiveCamera',
-					'number',
-					[]
-				);
-
-				Module.functions.sizeOfWebGLRenderer = Module.cwrap(
-					'sizeOfWebGLRenderer',
-					'number',
-					[]
-				);
-
-				Module.functions.Vector3_init = Module.cwrap(
-					'Vector3_init',
-					'number',
-					[ 'number', 'number', 'number', 'number' ]
-				);
-
-				Module.functions.BufferAttribute_init = Module.cwrap(
-					'BufferAttribute_init',
-					'number',
-					[ 'number', 'number', 'number', 'number', 'number' ]
-				);
-
-				Module.functions.BufferGeometry_init = Module.cwrap(
-					'BufferGeometry_init',
-					'number',
-					[ 'number' ]
-				);
-
-				Module.functions.BufferGeometry_setIndex = Module.cwrap(
-					'BufferGeometry_setIndex',
-					'number',
-					[ 'number', 'number' ]
-				);
-
-				Module.functions.BufferGeometry_addAttribute = Module.cwrap(
-					'BufferGeometry_addAttribute',
-					'number',
-					[ 'number', 'number', 'number' ]
-				);
-
-				Module.functions.Object3D_init = Module.cwrap(
-					'Object3D_init',
-					'number',
-					[ 'number' ]
-				);
-
-				Module.functions.Mesh_init = Module.cwrap(
-					'Mesh_init',
-					'number',
-					[ 'number', 'number', 'number' ]
-				);
-
-				Module.functions.MeshBasicMaterial_init = Module.cwrap(
-					'MeshBasicMaterial_init',
-					'number',
-					[ 'number', 'number' ]
-				);
-
-				Module.functions.Object3D_add = Module.cwrap(
-					'Object3D_add',
-					'number',
-					[ 'number', 'number' ]
-				);
-
-				Module.functions.Object3D_getPositionPointer = Module.cwrap(
-					'Object3D_getPositionPointer',
-					'number',
-					[ 'number' ]
-				);
-
-				Module.functions.Scene_init = Module.cwrap(
-					'Scene_init',
-					'number',
-					[ 'number' ]
-				);
-
-				Module.functions.PerspectiveCamera_init = Module.cwrap(
-					'PerspectiveCamera_init',
-					'number',
-					[ 'number' ]
-				);
-
-				Module.functions.WebGLRenderer_init = Module.cwrap(
-					'WebGLRenderer_init',
-					'number',
-					[ 'number', 'number', 'number' ]
-				);
-
-				Module.functions.WebGLRenderer_setSize = Module.cwrap(
-					'WebGLRenderer_setSize',
-					'number',
-					[ 'number', 'number' ]
-				);
-
-				Module.functions.WebGLRenderer_clearColor = Module.cwrap(
-					'WebGLRenderer_clearColor',
-					'void',
-					[ 'number', 'number', 'number', 'number', 'number' ]
-				);
-
-				Module.functions.WebGLRenderer_render = Module.cwrap(
-					'WebGLRenderer_render',
-					'void',
-					[ 'number', 'number' ]
-				);
-
-			}
 
 			THREE.Vector3Ex = ( function () {
 
@@ -279,7 +194,7 @@
 
 					this.pointer = pointer;
 
-					var elements = new Float64Array( Module.HEAPF64.buffer, this.pointer, 3 );
+					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 3 );
 
 					elements[ 0 ] = this.x;
 					elements[ 1 ] = this.y;
@@ -306,7 +221,7 @@
 					THREE.Quaternion.call( this, x, y, z );
 
 					this.pointer = pointer;
-					var elements = new Float64Array( Module.HEAPF64.buffer, this.pointer, 4 );
+					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 4 );
 
 					elements[ 0 ] = this.x;
 					elements[ 1 ] = this.y;
@@ -335,7 +250,7 @@
 
 					this.pointer = pointer;
 
-					var elements = new Float64Array( Module.HEAPF64.buffer, this.pointer, 16 );
+					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 16 );
 
 					for ( var i = 0; i < 16; i ++ ) {
 
@@ -363,10 +278,9 @@
 
 					THREE.Object3D.call( this );
 
-					this.pointer = Module._malloc( Module.functions.sizeOfObject3D() );
-					Module.functions.Object3D_init( this.pointer );
+					this.pointer = WASM.Object3D_init();
 
-					var offset = Module.functions.Object3D_getPositionPointer( this.pointer );
+					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
 					offset += 3 * 8;
@@ -434,8 +348,7 @@
 					add: function ( child ) {
 
 						THREE.Object3D.prototype.add.call( this, child );
-
-						Module.functions.Object3D_add( this.pointer, child.pointer );
+						WASM.Object3D_add( this.pointer, child.pointer );
 						return this;
 
 					}
@@ -452,10 +365,9 @@
 
 					THREE.Mesh.call( this, geometry, material );
 
-					this.pointer = Module._malloc( Module.functions.sizeOfMesh() );
-					Module.functions.Mesh_init( this.pointer, geometry.pointer, material.pointer );
+					this.pointer = WASM.Mesh_init( geometry.pointer, material.pointer );
 
-					var offset = Module.functions.Object3D_getPositionPointer( this.pointer );
+					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
 					offset += 3 * 8;
@@ -524,7 +436,7 @@
 
 						THREE.Mesh.prototype.add.call( this, child );
 
-						Module.functions.Object3D_add( this.pointer, child.pointer );
+						WASM.Object3D_add( this.pointer, child.pointer );
 						return this;
 
 					}
@@ -541,10 +453,9 @@
 
 					THREE.Scene.call( this );
 
-					this.pointer = Module._malloc( Module.functions.sizeOfScene() );
-					Module.functions.Scene_init( this.pointer );
+					this.pointer = WASM.Scene_init( );
 
-					var offset = Module.functions.Object3D_getPositionPointer( this.pointer );
+					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
 					offset += 3 * 8;
@@ -611,7 +522,7 @@
 
 					updateMatrixWorld: function ( force ) {
 
-						Module.functions.Object3D_updateMatrixWorld( this.pointer, force ? 1 : 0 );
+						WASM.Object3D_updateMatrixWorld( this.pointer, force ? 1 : 0 );
 
 					},
 
@@ -619,7 +530,11 @@
 
 						THREE.Scene.prototype.add.call( this, child );
 
-						Module.functions.Object3D_add( this.pointer, child.pointer );
+						if(this.pointer == child.pointer){
+							throw new Error("CYCLICAL POINTERS");
+						}
+
+						WASM.Object3D_add( this.pointer, child.pointer );
 						return this;
 
 					}
@@ -635,10 +550,9 @@
 				function PerspectiveCameraEx( fov, aspect, near, far ) {
 
 					THREE.PerspectiveCamera.call( this, fov, aspect, near, far );
-					this.pointer = Module._malloc( Module.functions.sizeOfPerspectiveCamera() );
-					Module.functions.PerspectiveCamera_init( this.pointer, this.fov, this.aspect, this.near, this.far );
+					this.pointer = WASM.PerspectiveCamera_init( this.fov, this.aspect, this.near, this.far );
 
-					var offset = Module.functions.Object3D_getPositionPointer( this.pointer );
+					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
 					offset += 3 * 8;
@@ -715,12 +629,11 @@
 
 					THREE.BufferAttribute.call( this, array, itemSize, normalized );
 
-					this.pointer = Module._malloc( Module.functions.sizeOfBufferAttribute() );
-					var arrayPointer = Module._malloc( this.array.byteLength );
-					var typedArray = new this.array.constructor( Module.HEAPU8.buffer, arrayPointer, this.array.length );
+					var arrayPointer = WASM.malloc( this.array.byteLength );
+					var typedArray = new this.array.constructor( HEAP_RAW_BUFFER, arrayPointer, this.array.length );
 					typedArray.set( this.array );
-					Module.functions.BufferAttribute_init(
-						this.pointer,
+
+					this.pointer = WASM.BufferAttribute_init(
 						arrayPointer,
 						this.array.constructor === Float32Array ? 0 : 1,
 						this.array.byteLength,
@@ -745,8 +658,7 @@
 
 					THREE.BufferGeometry.call( this );
 
-					this.pointer = Module._malloc( Module.functions.sizeOfBufferGeometry() );
-					Module.functions.BufferGeometry_init( this.pointer );
+					this.pointer = WASM.BufferGeometry_init( this.pointer );
 
 				}
 
@@ -759,7 +671,7 @@
 						if ( name !== 'position' ) return; // Currently support only position.
 
 						THREE.BufferGeometry.prototype.addAttribute.call( this, name, attribute );
-						Module.functions.BufferGeometry_addAttribute( this.pointer, stringsToPointer( name ), attribute.pointer );
+						WASM.BufferGeometry_addAttribute( this.pointer, getAttributeID( name ), attribute.pointer );
 						return this;
 
 					},
@@ -767,7 +679,7 @@
 					setIndex: function ( index ) {
 
 						THREE.BufferGeometry.prototype.setIndex.call( this, index );
-						Module.functions.BufferGeometry_setIndex( this.pointer, index.pointer );
+						WASM.BufferGeometry_setIndex( this.pointer, index.pointer );
 						return this;
 
 					}
@@ -783,14 +695,7 @@
 				function MeshBasicMaterialEx( params ) {
 
 					THREE.MeshBasicMaterial.call( this, params );
-
-					var vector3Pointer = Module._malloc( Module.functions.sizeOfVector3() );
-					var vector3Array = new Float64Array( Module.HEAPU8.buffer, vector3Pointer, 3 );
-					this.color.toArray( vector3Array );
-					this.pointer = Module._malloc( Module.functions.sizeOfMeshBasicMaterial() );
-					Module.functions.MeshBasicMaterial_init( this.pointer, vector3Pointer );
-					Module._free( vector3Pointer );
-
+					this.pointer = WASM.MeshBasicMaterial_init( this.color.r, this.color.g, this.color.b );
 				}
 
 				MeshBasicMaterialEx.prototype = Object.assign( Object.create( THREE.MeshBasicMaterial.prototype ), {
@@ -812,8 +717,7 @@
 					var canvas = params.canvas;
 					var id = canvas.id;
 
-					this.pointer = Module._malloc( Module.functions.sizeOfWebGLRenderer() );
-					Module.functions.WebGLRenderer_init( this.pointer, stringsToPointer( id ), params.antialias === true ? 1 : 0 );
+					this.pointer = WASM.WebGLRenderer_init( params.antialias === true ? 1 : 0 );
 
 				}
 
@@ -822,22 +726,23 @@
 					constructor: WebGLRendererEx,
 
 					setClearColor( color, alpha ) {
+						console.log(WASM.WebGLRenderer_clearColor);
 
-						Module.functions.WebGLRenderer_clearColor( this.pointer, color.r, color.g, color.b, alpha );
+						WASM.WebGLRenderer_clearColor( this.pointer, color.r, color.g, color.b, alpha );
 						return this;
 
 					},
 
 					setSize: function ( width, height ) {
 
-						Module.functions.WebGLRenderer_setSize( this.pointer, width, height );
+						WASM.WebGLRenderer_setSize( this.pointer, width, height );
 						return this;
 
 					},
 
 					render: function ( scene, camera ) {
 
-						Module.functions.WebGLRenderer_render( this.pointer, scene.pointer, camera.pointer );
+						WASM.WebGLRenderer_render( this.pointer, scene.pointer, camera.pointer );
 						return this;
 
 					}
@@ -848,12 +753,12 @@
 
 			}() );
 
-			function stringsToPointer( str ) {
-
-				var pointer = Module._malloc( str.length + 1 );
-				Module.stringToUTF8( str, pointer, str.length + 1 );
-				return pointer;
-
+			function getAttributeID(str){
+				if(str == "position"){
+					return 0;
+				}else{
+					throw new Error("UKNOWN ATTRIBUTE TYPE: ", str);
+				}
 			}
 
 			function init() {
@@ -871,6 +776,7 @@
 					canvas: canvas,
 					antialias: antialias
 				} );
+
 				renderer.setSize( width, height );
 				renderer.setClearColor( new THREE.Color( 0xffffff ), 1.0 );
 
@@ -932,7 +838,6 @@
 			}
 
 			function animate() {
-
 				requestAnimationFrame( animate );
 
 				camera.position.x += ( mouseX - camera.position.x ) * 0.05;
@@ -941,7 +846,7 @@
 
 				//scene.rotation.x += 0.002;
 				//scene.rotation.y += 0.004;
-
+				//
 				if ( animationEnabled ) {
 
 					for ( var i = 0, il = scene.children.length; i < il; i ++ ) {
@@ -954,11 +859,28 @@
 
 				}
 
-				renderer.render( scene, camera );
+				// console.log(WASM);
+				// // scene.updateMatrixWorld(true);
+				// // console.log(scene.children.map(c => c.pointer));
+				// let v = WASM.testVector();
+				// console.log(v);
+				//
+				// WASM.push(v, 1);
+				// WASM.push(v, 2);
 
+				// console.log(WASM.get(v, 0));
+				// console.log(WASM.get(v, 0));
+				// console.log(WASM.get(v, 1));
+				//
+				// console.log(WASM.get(v, 5));
+
+				//
+				renderer.render( scene, camera );
+				//
 				stats.update();
 
 			}
+		})();
 
 		</script>
 	</body>

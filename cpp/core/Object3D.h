@@ -3,7 +3,7 @@
 
 //#define CACHED
 
-#include <vector>
+#include "../my_std/vec.hpp"
 #include "../math/Vector3.h"
 #include "../math/Quaternion.h"
 #include "../math/Matrix3.h"
@@ -26,7 +26,7 @@ public:
 	bool matrixAutoUpdate;
 	bool matrixWorldNeedsUpdate;
 	Object3D *parent;
-	std::vector<Object3D*> children;
+	polygon_vec<Object3D*> children;
 #ifdef CACHED
 	Vector3 cachedPosition;
 	Quaternion cachedQuaternion;

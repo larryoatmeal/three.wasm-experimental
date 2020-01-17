@@ -15,17 +15,17 @@ BufferGeometry* BufferGeometry::setIndex(
 }
 
 BufferGeometry* BufferGeometry::addAttribute(
-	std::string name,
+	int attribute_key,
 	BufferAttribute *attribute
 ) {
-	this->attributes[name] = attribute;
+	this->attributes.put(attribute_key, attribute);
 	return this;
 }
 
 BufferAttribute* BufferGeometry::getAttribute(
-	std::string name
+	int attribute_key
 ) {
-	return this->attributes[name];
+	return this->attributes.get(attribute_key);
 }
 
 BufferGeometry* BufferGeometry::computeBoundingSphere() {
@@ -36,7 +36,7 @@ BufferGeometry* BufferGeometry::computeBoundingSphere() {
 		this->boundingSphere = new Sphere();
 	}
 
-	BufferAttribute *position = this->attributes["position"];
+	BufferAttribute *position = attributes.get(POSITION_ATTRIBUTE);
 
 	box.setFromBufferAttribute(position);
 	box.getCenter(&this->boundingSphere->center);

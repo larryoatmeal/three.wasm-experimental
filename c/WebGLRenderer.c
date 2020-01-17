@@ -1,4 +1,4 @@
-﻿#include <stdlib.h>
+// ﻿#include <stdlib.h>
 #include "WebGLRenderer.h"
 
 int validEmscriptenResult(
@@ -6,25 +6,24 @@ int validEmscriptenResult(
 ) {
 	if(result == EMSCRIPTEN_RESULT_SUCCESS)
 		return 1;
-
-	if(result == EMSCRIPTEN_RESULT_DEFERRED)
-		printf("EMSCRIPTEN_RESULT_DEFERRED error\n");
-	else if(result == EMSCRIPTEN_RESULT_NOT_SUPPORTED)
-		printf("EMSCRIPTEN_RESULT_NOT_SUPPORTED error\n");
-	else if(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED)
-		printf("EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED error\n");
-	else if(result == EMSCRIPTEN_RESULT_INVALID_TARGET)
-		printf("EMSCRIPTEN_RESULT_INVALID_TARGETT error\n");
-	else if(result == EMSCRIPTEN_RESULT_UNKNOWN_TARGET)
-		printf("EMSCRIPTEN_RESULT_UNKNOWN_TARGET error\n");
-	else if(result == EMSCRIPTEN_RESULT_INVALID_PARAM)
-		printf("EMSCRIPTEN_RESULT_INVALID_PARAM error\n");
-	else if(result == EMSCRIPTEN_RESULT_FAILED)
-		printf("EMSCRIPTEN_RESULT_FAILED error\n");
-	else if(result == EMSCRIPTEN_RESULT_NO_DATA)
-		printf("EMSCRIPTEN_RESULT_NO_DATA error\n");
-	else
-		printf("Unknown error\n");
+	// if(result == EMSCRIPTEN_RESULT_DEFERRED)
+	// 	//printf("EMSCRIPTEN_RESULT_DEFERRED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_NOT_SUPPORTED)
+	// 	//printf("EMSCRIPTEN_RESULT_NOT_SUPPORTED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED)
+	// 	//printf("EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_INVALID_TARGET)
+	// 	//printf("EMSCRIPTEN_RESULT_INVALID_TARGETT error\n");
+	// else if(result == EMSCRIPTEN_RESULT_UNKNOWN_TARGET)
+	// 	//printf("EMSCRIPTEN_RESULT_UNKNOWN_TARGET error\n");
+	// else if(result == EMSCRIPTEN_RESULT_INVALID_PARAM)
+	// 	//printf("EMSCRIPTEN_RESULT_INVALID_PARAM error\n");
+	// else if(result == EMSCRIPTEN_RESULT_FAILED)
+	// 	//printf("EMSCRIPTEN_RESULT_FAILED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_NO_DATA)
+	// 	//printf("EMSCRIPTEN_RESULT_NO_DATA error\n");
+	// else
+	// 	//printf("Unknown error\n");
 
 	return 0;
 }
@@ -53,7 +52,7 @@ GLuint loadShader(
 		if(infoLen > 1) {
 			char *infoLog = malloc(sizeof(char) * infoLen);
 			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
-			printf("Error compiling code\n%s\n", infoLog);
+			// //printf("Error compiling code\n%s\n", infoLog);
 			free(infoLog);
 		}
 
@@ -65,7 +64,7 @@ GLuint loadShader(
 }
 
 GLuint compileShader() {
-	GLbyte vertexShaderCode[] =  
+	GLbyte vertexShaderCode[] =
 		"attribute vec4 position;\n"
 		"uniform mat4 modelMatrix;\n"
 		"uniform mat4 modelViewMatrix;\n"
@@ -78,7 +77,7 @@ GLuint compileShader() {
 		"	gl_Position = modelMatrix * position;\n"
 		"}\n";
 
-	GLbyte fragmentShaderCode[] =  
+	GLbyte fragmentShaderCode[] =
 		"precision mediump float;\n"\
 		"void main()\n"
 		"{\n"
@@ -98,7 +97,7 @@ GLuint compileShader() {
 	glBindAttribLocation(program, 0, "position");
 	glLinkProgram(program);
 
-	printf("%d\n", glGetUniformLocation(program, "modelMatrix"));
+	// //printf("%d\n", glGetUniformLocation(program, "modelMatrix"));
 
 	GLint linked;
 
@@ -112,7 +111,7 @@ GLuint compileShader() {
 		if(infoLen > 1) {
 			char *infoLog = malloc(sizeof(char) * infoLen);
 			glGetProgramInfoLog(program, infoLen, 0, infoLog);
-			printf("Error linking program:\n%s\n", infoLog);
+			// //printf("Error linking program:\n%s\n", infoLog);
 			free(infoLog);
 		}
 
@@ -135,7 +134,7 @@ struct WebGLRenderer* WebGLRenderer_init(
 	struct WebGLRenderer *self,
 	char *id
 ) {
-	printf( "Context creation for %s\n", id );
+	// //printf( "Context creation for %s\n", id );
 
 	self->context.id = id;
 	self->initialized = 0;
@@ -150,7 +149,7 @@ struct WebGLRenderer* WebGLRenderer_init(
 	self->context.context = emscripten_webgl_create_context(id, &attrs);
 
 	if (self->context.context <= 0) {
-		printf("Context creation Error\n");
+		// //printf("Context creation Error\n");
 		validEmscriptenResult((EMSCRIPTEN_RESULT)self->context.context);
 		return self;
 	}

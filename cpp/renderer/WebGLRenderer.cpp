@@ -1,33 +1,33 @@
 ﻿#include <stdlib.h>
-#include <algorithm>
+// #include <algorithm>
 #include "WebGLRenderer.h"
-
 bool validEmscriptenResult(
 	EMSCRIPTEN_RESULT result
 ) {
-	if(result == EMSCRIPTEN_RESULT_SUCCESS)
-		return 1;
 
-	if(result == EMSCRIPTEN_RESULT_DEFERRED)
-		printf("EMSCRIPTEN_RESULT_DEFERRED error\n");
-	else if(result == EMSCRIPTEN_RESULT_NOT_SUPPORTED)
-		printf("EMSCRIPTEN_RESULT_NOT_SUPPORTED error\n");
-	else if(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED)
-		printf("EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED error\n");
-	else if(result == EMSCRIPTEN_RESULT_INVALID_TARGET)
-		printf("EMSCRIPTEN_RESULT_INVALID_TARGETT error\n");
-	else if(result == EMSCRIPTEN_RESULT_UNKNOWN_TARGET)
-		printf("EMSCRIPTEN_RESULT_UNKNOWN_TARGET error\n");
-	else if(result == EMSCRIPTEN_RESULT_INVALID_PARAM)
-		printf("EMSCRIPTEN_RESULT_INVALID_PARAM error\n");
-	else if(result == EMSCRIPTEN_RESULT_FAILED)
-		printf("EMSCRIPTEN_RESULT_FAILED error\n");
-	else if(result == EMSCRIPTEN_RESULT_NO_DATA)
-		printf("EMSCRIPTEN_RESULT_NO_DATA error\n");
-	else
-		printf("Unknown error\n");
+	// if(result == EMSCRIPTEN_RESULT_SUCCESS)
+	// 	return 1;
+	//
+	// if(result == EMSCRIPTEN_RESULT_DEFERRED)
+	// 	//printf("EMSCRIPTEN_RESULT_DEFERRED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_NOT_SUPPORTED)
+	// 	//printf("EMSCRIPTEN_RESULT_NOT_SUPPORTED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED)
+	// 	//printf("EMSCRIPTEN_RESULT_FAILED_NOT_DEFERRED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_INVALID_TARGET)
+	// 	//printf("EMSCRIPTEN_RESULT_INVALID_TARGETT error\n");
+	// else if(result == EMSCRIPTEN_RESULT_UNKNOWN_TARGET)
+	// 	//printf("EMSCRIPTEN_RESULT_UNKNOWN_TARGET error\n");
+	// else if(result == EMSCRIPTEN_RESULT_INVALID_PARAM)
+	// 	//printf("EMSCRIPTEN_RESULT_INVALID_PARAM error\n");
+	// else if(result == EMSCRIPTEN_RESULT_FAILED)
+	// 	//printf("EMSCRIPTEN_RESULT_FAILED error\n");
+	// else if(result == EMSCRIPTEN_RESULT_NO_DATA)
+	// 	//printf("EMSCRIPTEN_RESULT_NO_DATA error\n");
+	// else
+	// 	//printf("Unknown error\n");
 
-	return 0;
+	return 1;
 }
 
 GLuint loadShader(
@@ -53,7 +53,7 @@ GLuint loadShader(
 		if(infoLen > 1) {
 			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
 			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
-			printf("Error compiling code\n%s\n", infoLog);
+			//printf("Error compiling code\n%s\n", infoLog);
 			free(infoLog);
 		}
 
@@ -65,7 +65,7 @@ GLuint loadShader(
 }
 
 GLuint WebGLRenderer::compileShader() {
-	GLbyte vertexShaderCode[] =  
+	GLbyte vertexShaderCode[] =
 		"attribute vec3 position;\n"
 		"uniform mat4 modelMatrix;\n"
 		"uniform mat4 modelViewMatrix;\n"
@@ -79,7 +79,7 @@ GLuint WebGLRenderer::compileShader() {
 		"	gl_Position = projectionMatrix * mvPosition;\n"
 		"}\n";
 
-	GLbyte fragmentShaderCode[] =  
+	GLbyte fragmentShaderCode[] =
 		"precision mediump float;\n"
 		"uniform vec3 color;\n"
 		"void main()\n"
@@ -100,9 +100,9 @@ GLuint WebGLRenderer::compileShader() {
 	glBindAttribLocation(program, 0, "position");
 	glLinkProgram(program);
 
-	this->uniformLocationMap["modelViewMatrix"] = glGetUniformLocation(program, "modelViewMatrix");
-	this->uniformLocationMap["projectionMatrix"] = glGetUniformLocation(program, "projectionMatrix");
-	this->uniformLocationMap["color"] = glGetUniformLocation(program, "color");
+	this->uniformLocationMap.put(UNIFORM_modelViewMatrix, glGetUniformLocation(program, "modelViewMatrix"));
+	this->uniformLocationMap.put(UNIFORM_projectionMatrix, glGetUniformLocation(program, "projectionMatrix"));
+	this->uniformLocationMap.put(UNIFORM_color, glGetUniformLocation(program, "color"));
 
 	GLint linked;
 
@@ -116,7 +116,7 @@ GLuint WebGLRenderer::compileShader() {
 		if(infoLen > 1) {
 			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
 			glGetProgramInfoLog(program, infoLen, 0, infoLog);
-			printf("Error linking program:\n%s\n", infoLog);
+			//printf("Error linking program:\n%s\n", infoLog);
 			free(infoLog);
 		}
 
@@ -128,11 +128,10 @@ GLuint WebGLRenderer::compileShader() {
 }
 
 WebGLRenderer::WebGLRenderer(
-	char *_id,
 	bool antialias
-): id(_id), currentGeometry(NULL), initialized(false),
+): currentGeometry(NULL), initialized(false),
 	program(0), currentProgram(0), currentCamera(NULL) {
-	printf( "Context creation for %s\n", id );
+	//printf( "Context creation for %s\n", id );
 
 	EmscriptenWebGLContextAttributes attrs;
 	attrs.explicitSwapControl = 0;
@@ -141,17 +140,18 @@ WebGLRenderer::WebGLRenderer(
 	attrs.antialias = antialias ? 1 : 0;
 	attrs.majorVersion = 1;
 	attrs.minorVersion = 0;
-	this->context = emscripten_webgl_create_context(_id, &attrs);
+	this->context = emscripten_webgl_create_context(&attrs);
 
 	if(this->context <= 0) {
-		printf("Context creation Error\n");
+		//printf("Context creation Error\n");
+		console_error(0);
 		validEmscriptenResult((EMSCRIPTEN_RESULT)this->context);
 		return;
 	}
 
-	if (! this->activateContext()) {
-		return;
-	}
+	// if (! this->activateContext()) {
+	// 	return;
+	// }
 
 	this->attributes = new WebGLAttributes();
 	this->geometries = new WebGLGeometries(this->attributes);
@@ -194,31 +194,42 @@ WebGLRenderer* WebGLRenderer::clear() {
 	return this;
 }
 
+polygon_vec<Object3D*> stack;
 void WebGLRenderer::projectObject(
 	Object3D *object,
 	Camera *camera
 ) {
-	if(object->type() == MeshType && this->frustum.intersectsObject(object)) {
-		this->tmpVector3.setFromMatrixPosition(&object->matrixWorld)
-			->applyMatrix4(&this->projScreenMatrix);
-		struct RenderItem entry;
-		entry.object = object;
-		entry.z = this->tmpVector3.z;
-		this->currentRenderList.push_back(entry);
-		this->geometries->update(((Mesh*)object)->geometry);
-	}
 
-	for(int i = 0, il = object->children.size(); i < il; ++i) {
-		this->projectObject(object->children[i], camera);
-	}
+	int size = object->children.size();
+	stack.push_back(object);
+	while (!stack.empty())
+  {
+    Object3D* node = stack.back();
+
+		if(node->type() == MeshType && this->frustum.intersectsObject(node)) {
+			this->tmpVector3.setFromMatrixPosition(&node->matrixWorld)
+				->applyMatrix4(&this->projScreenMatrix);
+			struct RenderItem entry;
+			entry.object = node;
+			entry.z = this->tmpVector3.z;
+			this->currentRenderList.push_back(entry);
+			this->geometries->update(((Mesh*)node)->geometry);
+		}
+
+    stack.pop_back();
+		for(int i = 0; i < node->children.size(); i++) {
+				stack.push_back(node->children[i]);
+		}
+  }
 }
 
 void WebGLRenderer::renderObjects(
-	std::vector<RenderItem> *renderList,
+	polygon_vec<RenderItem> *renderList,
 	Scene *scene,
 	Camera *camera
 ) {
-	for(int i = 0, il = renderList->size(); i < il; ++i) {
+	int size = renderList->size();
+	for(int i = 0, il = size; i < il; ++i) {
 		this->renderObject((*renderList)[i].object, camera);
 	}
 }
@@ -248,18 +259,24 @@ void WebGLRenderer::renderObject(
 		for(int i = 0; i < 16; ++i) {
 			projectionMatrixElements[i] = camera->projectionMatrix.elements[i];
 		}
-		glUniformMatrix4fv(this->uniformLocationMap["projectionMatrix"], 1, GL_FALSE, projectionMatrixElements);
+		glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_projectionMatrix), 1, GL_FALSE, projectionMatrixElements);
 		this->currentCamera = camera;
 	}
 
 	if(this->currentGeometry != geometry) {
-		for(std::map<std::string, BufferAttribute*>::iterator it =
-			mesh->geometry->attributes.begin();
-			it != mesh->geometry->attributes.end(); ++it) {
-			glBindBuffer(GL_ARRAY_BUFFER, this->attributes->get(it->second).buffer);
+		auto geometry_attribute_elements = mesh->geometry->attributes.elements;
+		for(int i = 0; i < geometry_attribute_elements.size(); i++){
+			glBindBuffer(GL_ARRAY_BUFFER, this->attributes->get(geometry_attribute_elements[i]).buffer);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(0);
 		}
+		// for(std::map<std::string, BufferAttribute*>::iterator it =
+		// 	mesh->geometry->attributes.begin();
+		// 	it != mesh->geometry->attributes.end(); ++it) {
+		// 	glBindBuffer(GL_ARRAY_BUFFER, this->attributes->get(it->second).buffer);
+		// 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		// 	glEnableVertexAttribArray(0);
+		// }
 		this->currentGeometry = geometry;
 	}
 
@@ -274,20 +291,20 @@ void WebGLRenderer::renderObject(
 			this->attributes->get(geometry->index).buffer);
 		drawCount = mesh->geometry->index->count;
 	} else {
-		drawCount = mesh->geometry->getAttribute("position")->count;
+		drawCount = mesh->geometry->getAttribute(POSITION_ATTRIBUTE)->count;
 	}
 
 	GLfloat modelViewMatrixElements[16];
 	for(int i = 0; i < 16; ++i) {
 		modelViewMatrixElements[i] = (GLfloat)object->modelViewMatrix.elements[i];
 	}
-	glUniformMatrix4fv(this->uniformLocationMap["modelViewMatrix"], 1, GL_FALSE, modelViewMatrixElements);
+	glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_modelViewMatrix), 1, GL_FALSE, modelViewMatrixElements);
 
 	GLfloat colorElements[3];
 	colorElements[0] = color->x;
 	colorElements[1] = color->y;
 	colorElements[2] = color->z;
-	glUniform3fv(this->uniformLocationMap["color"], 1, colorElements);
+	glUniform3fv(this->uniformLocationMap.get(UNIFORM_color), 1, colorElements);
 
 	this->renderer.render(drawStart, drawCount);
 }
@@ -319,12 +336,16 @@ WebGLRenderer* WebGLRenderer::render(
 	this->frustum.setFromMatrix(&this->projScreenMatrix);
 
 	this->projectObject(scene, camera);
-	std::sort(this->currentRenderList.begin(), this->currentRenderList.end(),
-		painterSort());
+
+	//use custom sorting algorithm
+	
+
+	// std::sort(this->currentRenderList.begin(), this->currentRenderList.end(),
+	// 	painterSort());
 
 	this->clear();
 	this->renderObjects(&this->currentRenderList, scene, camera);
-
+	//
 	this->currentRenderList.clear();
 	this->currentCamera = NULL;
 

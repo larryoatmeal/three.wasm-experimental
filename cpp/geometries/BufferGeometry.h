@@ -1,16 +1,21 @@
 ﻿#ifndef __THREE_BUFFER_GEOMETRY__
 #define __THREE_BUFFER_GEOMETRY__
 
-#include <map>
-#include <string>
+
+#include "../my_std/map.hpp"
+// #include <map>
+// #include <string>
 #include "../core/BufferAttribute.h"
 #include "../math/Sphere.h"
 #include "../math/Box3.h"
 
+const int POSITION_ATTRIBUTE = 0;
+
+
 class BufferGeometry {
 public:
 	BufferAttribute *index;
-	std::map<std::string, BufferAttribute*> attributes;
+	polygon_map<int, BufferAttribute*> attributes;
 	Sphere *boundingSphere;
 
 	BufferGeometry();
@@ -22,12 +27,12 @@ public:
 	);
 
 	BufferGeometry* addAttribute(
-		std::string name,
+		int atrribute_key,
 		BufferAttribute *attribute
 	);
 
 	BufferAttribute* getAttribute(
-		std::string name
+		int atrribute_key
 	);
 
 	BufferGeometry* computeBoundingSphere();

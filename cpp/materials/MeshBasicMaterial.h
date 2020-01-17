@@ -11,7 +11,7 @@ public:
 	MeshBasicMaterial();
 
 	MeshBasicMaterial(
-		Vector3 *_color
+		Vector3 _color
 	);
 
 	virtual MaterialType type() { return MeshBasicMaterialType; }

@@ -24,12 +24,12 @@ void WebGLAttributes::update(
 	GLenum bufferType
 ) {
 	if(this->buffers.count(attribute) == 0) {
-		this->buffers[attribute] = this->createBuffer(attribute, bufferType);
+		this->buffers.put(attribute, this->createBuffer(attribute, bufferType));
 	}
 }
 
 WebGLBufferEntry WebGLAttributes::get(
 	BufferAttribute *attribute
 ) {
-	return this->buffers[attribute];
+	return this->buffers.get(attribute);
 }

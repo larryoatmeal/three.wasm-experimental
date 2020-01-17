@@ -13,10 +13,10 @@ extern "C" {
 #endif
 
 /* This file defines Emscripten low-level glue bindings for interfacing with HTML5 APIs
- * 
- * Documentation for the public APIs defined in this file must be updated in: 
+ *
+ * Documentation for the public APIs defined in this file must be updated in:
  *    site/source/docs/api_reference/html5.h.rst
- * A prebuilt local version of the documentation is available at: 
+ * A prebuilt local version of the documentation is available at:
  *    site/build/text/docs/api_reference/html5.h.txt
  * You can also build docs locally as HTML or other formats in site/
  * An online HTML version (which may be of a different version of Emscripten)
@@ -426,7 +426,7 @@ typedef struct EmscriptenWebGLContextAttributes {
 
 extern void emscripten_webgl_init_context_attributes(EmscriptenWebGLContextAttributes *attributes);
 
-extern EMSCRIPTEN_WEBGL_CONTEXT_HANDLE emscripten_webgl_create_context(const char *target, const EmscriptenWebGLContextAttributes *attributes);
+extern EMSCRIPTEN_WEBGL_CONTEXT_HANDLE emscripten_webgl_create_context(const EmscriptenWebGLContextAttributes *attributes);
 
 extern EMSCRIPTEN_RESULT emscripten_webgl_make_context_current(EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context);
 

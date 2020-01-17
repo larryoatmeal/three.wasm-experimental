@@ -1,13 +1,22 @@
 #/bin/bash
-
+export EMCC_FORCE_STDLIBS=
+export EMCC_ONLY_FORCED_STDLIBS=1
 emcc \
-	-O2\
-	-o ./three-wasm.js\
+	-Os\
+	-fno-exceptions\
+	-fno-rtti\
+	-o three-wasm.wasm\
+	-s STANDALONE_WASM\
 	./cpp/*.cpp ./cpp/*/*.cpp ./cpp/*/*/*.cpp \
-	--memory-init-file 0\
-	-s WASM=1\
-	-s ALLOW_MEMORY_GROWTH=1\
+	-s ALLOW_MEMORY_GROWTH=0\
+	-s TOTAL_MEMORY=100MB\
+	-s ERROR_ON_UNDEFINED_SYMBOLS=0\
+	-s ENVIRONMENT=web\
+	-s EXIT_RUNTIME=0\
 	-s EXPORTED_FUNCTIONS="[\
+	'_get',\
+	'_push',\
+	'_testVector',\
 	'_sizeOfVector3',\
 	'_sizeOfMatrix4',\
 	'_sizeOfBufferAttribute',\
@@ -38,7 +47,3 @@ emcc \
 	'_WebGLRenderer_render',\
 	'_initGl',\
 	'_runTest']"\
-	-s EXTRA_EXPORTED_RUNTIME_METHODS="[\
-	'ccall',\
-	'cwrap',\
-	'stringToUTF8']"

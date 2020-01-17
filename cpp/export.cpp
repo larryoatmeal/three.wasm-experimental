@@ -8,10 +8,39 @@
 #include "./scenes/Scene.h"
 #include "./cameras/PerspectiveCamera.h"
 #include "./renderer/WebGLRenderer.h"
+#include "./my_std/vec.hpp"
 
 // TODO: Replace with EMSCRIPTEN_BINDINGS?
 
+// Overloading Global new operator
+void* operator new(size_t sz)
+{
+	void* m = malloc(sz);
+	return m;
+}
+// Overloading Global delete operator
+void operator delete(void* m)
+{
+	free(m);
+}
+
+
 extern "C" {
+	polygon_vec<int>* testVector(){
+		return new polygon_vec<int>();
+	}
+
+	void push(polygon_vec<int>* vec, int val){
+		vec->push_back(val);
+	}
+
+	int get(polygon_vec<int>* vec, int index){
+		return (*vec)[index];
+	}
+
+
+
+	//C->JS
 	int sizeOfVector3() {
 		return sizeof(Vector3);
 	}
@@ -53,12 +82,11 @@ extern "C" {
 	}
 
 	Vector3* Vector3_init(
-		Vector3* v,
 		double x,
 		double y,
 		double z
 	) {
-		return new(v) Vector3(x, y, z);
+		return new Vector3(x, y, z);
 	}
 
 	Matrix4* Matrix4_multiplyMatrices(
@@ -70,28 +98,26 @@ extern "C" {
 	}
 
 	BufferAttribute* BufferAttribute_init(
-		BufferAttribute *attribute,
 		void *array,
 		BufferAttribute::type dataType,
 		int dataLength,
 		int itemSize
 	) {
-		return new(attribute) BufferAttribute(array, dataType,
+		return new BufferAttribute(array, dataType,
 			dataLength, itemSize);
 	}
 
 	BufferGeometry* BufferGeometry_init(
-		BufferGeometry *geometry
 	) {
-		return new(geometry) BufferGeometry();
+		return new BufferGeometry();
 	}
 
 	BufferGeometry* BufferGeometry_addAttribute(
 		BufferGeometry *geometry,
-		char *name,
+		int attribute_key,
 		BufferAttribute *attribute
 	) {
-		geometry->addAttribute(name, attribute);
+		geometry->addAttribute(attribute_key, attribute);
 		return geometry;
 	}
 
@@ -103,10 +129,9 @@ extern "C" {
 		return geometry;
 	}
 
-	Object3D* Object3D_init(
-		Object3D *object
+		Object3D* Object3D_init(
 	) {
-		return new(object) Object3D();
+		return new Object3D();
 	}
 
 	Object3D* Object3D_add(
@@ -131,42 +156,36 @@ extern "C" {
 	}
 
 	Mesh* Mesh_init(
-		Mesh* mesh,
 		BufferGeometry *geometry,
 		Material *material
 	) {
-		return new(mesh) Mesh(geometry, material);
+		return new Mesh(geometry, material);
 	}
 
 	MeshBasicMaterial* MeshBasicMaterial_init(
-		MeshBasicMaterial *material,
-		Vector3 *color
+		float r, float g, float b
 	) {
-		return new(material) MeshBasicMaterial(color);
+		return new MeshBasicMaterial(Vector3(r, g, b));
 	}
 
 	Scene* Scene_init(
-		Scene *scene
 	) {
-		return new(scene) Scene();
+		return new Scene();
 	}
 
 	PerspectiveCamera* PerspectiveCamera_init(
-		PerspectiveCamera* camera,
 		double fov,
 		double aspect,
 		double near,
 		double far
 	) {
-		return new(camera) PerspectiveCamera(fov, aspect, near, far);
+		return new PerspectiveCamera(fov, aspect, near, far);
 	}
 
 	WebGLRenderer* WebGLRenderer_init(
-		WebGLRenderer *renderer,
-		char *id,
 		bool antialias
 	) {
-		return new(renderer) WebGLRenderer(id, antialias);
+		return new WebGLRenderer(antialias);
 	}
 
 	WebGLRenderer* WebGLRenderer_setSize(
@@ -196,9 +215,8 @@ extern "C" {
 	}
 
 	void initGl(
-		char *id
 	) {
-		printf( "Context creation for %s\n", id );
+		//printf( "Context creation for %s\n", id );
 
 		EmscriptenWebGLContextAttributes attrs;
 		attrs.explicitSwapControl = 0;
@@ -208,10 +226,10 @@ extern "C" {
 		attrs.majorVersion = 1;
 		attrs.minorVersion = 0;
 
-		EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context = emscripten_webgl_create_context(id, &attrs);
+		EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context = emscripten_webgl_create_context(&attrs);
 
 		if(context <= 0) {
-			printf("Context creation Error\n");
+			//printf("Context creation Error\n");
 			return;
 		}
 
@@ -225,4 +243,40 @@ extern "C" {
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 		}
 	}
+
+	extern unsigned char __heap_base;
+	unsigned int bump_pointer = (unsigned int) &__heap_base;
+
+	//need to keep alignment at 8bytes
+	void *malloc(size_t size){
+		unsigned int r = bump_pointer;
+		if(size % 8 != 0){
+			size = (size / 8 + 1) * 8;
+		}
+		bump_pointer = bump_pointer + size;
+  	return (void *)r;
+	};
+	void free(void *ptr){
+
+	};
+
+
+
+
+
+
+
+
+	// void memcpy(void* dst, const void* src, int len) {
+	//   char* s = (char*)src;
+	//   char* d = (char*)dst;
+	//
+	//   for (int i = 0; i < len; ++i) {
+	//     d[i] = s[i];
+	//   }
+	// }
+	// void memcpy(void *dst, const void *src, int len);
+	// void memset(void *pointer, uchar value, uint size);
+
+
 }

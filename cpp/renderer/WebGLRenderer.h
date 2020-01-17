@@ -1,11 +1,12 @@
 ﻿#ifndef __THREE_WEBGLRENDERER_H__
 #define __THREE_WEBGLRENDERER_H__
 
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 #include <GLES2/gl2.h>
 #include <vector>
-#include <map>
+#include "../my_std/map.hpp"
+#include "../my_std/vec.hpp"
 #include "../include/html5.h"
 #include "../math/Matrix4.h"
 #include "../math/Frustum.h"
@@ -17,6 +18,12 @@
 #include "./webgl/WebGLAttributes.h"
 #include "./webgl/WebGLGeometries.h"
 #include "./webgl/WebGLIndexedBufferRenderer.h"
+#include "../js_external.h"
+
+
+const int UNIFORM_modelViewMatrix = 0;
+const int UNIFORM_projectionMatrix = 1;
+const int UNIFORM_color = 2;
 
 struct RenderItem {
 	Object3D* object;
@@ -26,7 +33,7 @@ struct RenderItem {
 class WebGLRenderer {
 private:
 	Matrix4 projScreenMatrix;
-	std::vector<RenderItem> currentRenderList;
+	polygon_vec<RenderItem> currentRenderList;
 	WebGLAttributes *attributes;
 	WebGLGeometries *geometries;
 	WebGLIndexedBufferRenderer renderer;
@@ -36,7 +43,7 @@ private:
 	Camera *currentCamera;
 	Frustum frustum;
 	Vector3 tmpVector3;
-	std::map<std::string, int> uniformLocationMap;
+	polygon_map<int, int> uniformLocationMap;
 
 	bool activateContext();
 
@@ -48,7 +55,7 @@ private:
 	);
 
 	void renderObjects(
-		std::vector<RenderItem> *renderList,
+		polygon_vec<RenderItem> *renderList,
 		Scene *scene,
 		Camera *camera
 	);
@@ -59,14 +66,12 @@ private:
 	);
 
 public:
-	char *id;
 	int width;
 	int height;
 	bool initialized;
 	EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
 
 	WebGLRenderer(
-		char *_id,
 		bool antialias
 	);
 
