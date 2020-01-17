@@ -5,7 +5,6 @@ emcc \
 	-fno-exceptions\
 	-fno-rtti\
 	-o three-wasm.wasm\
-	-s STANDALONE_WASM\
 	./cpp/*.cpp ./cpp/*/*.cpp ./cpp/*/*/*.cpp \
 	-s ALLOW_MEMORY_GROWTH=0\
 	-s TOTAL_MEMORY=100MB\
@@ -13,9 +12,6 @@ emcc \
 	-s ENVIRONMENT=web\
 	-s EXIT_RUNTIME=0\
 	-s EXPORTED_FUNCTIONS="[\
-	'_get',\
-	'_push',\
-	'_testVector',\
 	'_sizeOfVector3',\
 	'_sizeOfMatrix4',\
 	'_sizeOfBufferAttribute',\

@@ -24,22 +24,7 @@ void operator delete(void* m)
 	free(m);
 }
 
-
 extern "C" {
-	polygon_vec<int>* testVector(){
-		return new polygon_vec<int>();
-	}
-
-	void push(polygon_vec<int>* vec, int val){
-		vec->push_back(val);
-	}
-
-	int get(polygon_vec<int>* vec, int index){
-		return (*vec)[index];
-	}
-
-
-
 	//C->JS
 	int sizeOfVector3() {
 		return sizeof(Vector3);
