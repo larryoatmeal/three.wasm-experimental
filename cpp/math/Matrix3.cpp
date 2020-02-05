@@ -30,26 +30,26 @@ Matrix3* Matrix3::setFromMatrix4(
 Matrix3* Matrix3::getInverse(
 	struct Matrix3 *matrix
 ) {
-	double n11 = matrix->elements[0];
-	double n21 = matrix->elements[1];
-	double n31 = matrix->elements[2];
-	double n12 = matrix->elements[3];
-	double n22 = matrix->elements[4];
-	double n32 = matrix->elements[5];
-	double n13 = matrix->elements[6];
-	double n23 = matrix->elements[7];
-	double n33 = matrix->elements[8];
-	double t11 = n33 * n22 - n32 * n23;
-	double t12 = n32 * n13 - n33 * n12;
-	double t13 = n23 * n12 - n22 * n13;
-	double det = n11 * t11 + n21 * t12 + n31 * t13;
+	float n11 = matrix->elements[0];
+	float n21 = matrix->elements[1];
+	float n31 = matrix->elements[2];
+	float n12 = matrix->elements[3];
+	float n22 = matrix->elements[4];
+	float n32 = matrix->elements[5];
+	float n13 = matrix->elements[6];
+	float n23 = matrix->elements[7];
+	float n33 = matrix->elements[8];
+	float t11 = n33 * n22 - n32 * n23;
+	float t12 = n32 * n13 - n33 * n12;
+	float t13 = n23 * n12 - n22 * n13;
+	float det = n11 * t11 + n21 * t12 + n31 * t13;
 
 	if (det == 0.0) {
 		// TODO: Error handling
 		return this;
 	}
 
-	double detInv = 1.0 / det;
+	float detInv = 1.0 / det;
 	this->elements[0] = t11 * detInv;
 	this->elements[1] = (n31 * n23 - n33 * n21) * detInv;
 	this->elements[2] = (n32 * n21 - n31 * n22) * detInv;
@@ -64,7 +64,7 @@ Matrix3* Matrix3::getInverse(
 }
 
 Matrix3* Matrix3::transpose(){
-	double tmp;
+	float tmp;
 	tmp = this->elements[1];
 	this->elements[1] = this->elements[3];
 	this->elements[3] = tmp;

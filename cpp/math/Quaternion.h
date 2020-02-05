@@ -3,13 +3,13 @@
 
 class Quaternion {
 public:
-	double x;
-	double y;
-	double z;
-	double w;
+	float x;
+	float y;
+	float z;
+	float w;
 
 	Quaternion();
-	Quaternion(double _x, double _y, double _z, double _w);
+	Quaternion(float _x, float _y, float _z, float _w);
 
 	bool equals(
 		Quaternion *q
@@ -17,6 +17,10 @@ public:
 
 	Quaternion* copy(
 		Quaternion *q
+	);
+
+	Quaternion* setFromEuler(
+		float x, float y, float z
 	);
 };
 

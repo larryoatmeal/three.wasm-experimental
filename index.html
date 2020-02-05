@@ -69,12 +69,222 @@
 			let wasmBytes = await wasmStream.arrayBuffer();
 			let method_names =["glGetShaderiv","_ZNKSt3__220__vector_base_commonILb1EE20__throw_length_errorEv","glBindBuffer","glGetUniformLocation","glUniformMatrix4fv","glClearColor","glAttachShader","emscripten_webgl_make_context_current","emscripten_webgl_create_context","glGetShaderInfoLog","glCompileShader","glShaderSource","glCreateShader","glDrawElements","glBufferData","tan","glGenBuffers","glCullFace","glEnable","glUniform3fv","glEnableVertexAttribArray","glVertexAttribPointer","glUseProgram","glClear","glViewport","glDeleteProgram","glGetProgramInfoLog","glGetProgramiv","glLinkProgram","glBindAttribLocation","glCreateProgram","glDeleteShader","proc_exit"]
 
+
+			class OpaqueWebglConverter{
+			    constructor(){
+			        this.data = [0]; //initalize because index 0 is treated as error in gl, so start with index1
+				}
+
+				convert(opaqueHandle){
+			        let index = this.data.length;
+			        this.data.push(opaqueHandle);
+					return index;
+				}
+
+				get(gl_id){
+
+			        // if(this.data[gl_id] == null){
+			        //  	throw "INVALID GL_ID";
+					// }
+			        return this.data[gl_id];
+				}
+			}
+
+			class TempBufferViews{
+
+				constructor(){
+				    this.buffer_3fv = new Float32Array(3);
+				    this.buffer_matrix4fv = new Float32Array(16);
+				}
+
+				getView3fv(ptr){
+                    let index = ptr >> 2;
+                    this.buffer_3fv[0] = HEAP_FLOAT[index];
+				    this.buffer_3fv[1] = HEAP_FLOAT[index + 1];
+				    this.buffer_3fv[2] = HEAP_FLOAT[index + 2];
+					return this.buffer_3fv;
+				}
+
+                getViewMat4fv(ptr){
+                    let index = ptr >> 2;
+                    this.buffer_matrix4fv[0]  = HEAP_FLOAT[index];
+                    this.buffer_matrix4fv[1]  = HEAP_FLOAT[index + 1];
+                    this.buffer_matrix4fv[2]  = HEAP_FLOAT[index + 2];
+                    this.buffer_matrix4fv[3]  = HEAP_FLOAT[index + 3];
+                    this.buffer_matrix4fv[4]  = HEAP_FLOAT[index + 4];
+                    this.buffer_matrix4fv[5]  = HEAP_FLOAT[index + 5];
+                    this.buffer_matrix4fv[6]  = HEAP_FLOAT[index + 6];
+                    this.buffer_matrix4fv[7]  = HEAP_FLOAT[index + 7];
+                    this.buffer_matrix4fv[8]  = HEAP_FLOAT[index + 8];
+                    this.buffer_matrix4fv[9]  = HEAP_FLOAT[index + 9];
+                    this.buffer_matrix4fv[10] = HEAP_FLOAT[index + 10];
+                    this.buffer_matrix4fv[11] = HEAP_FLOAT[index + 11];
+                    this.buffer_matrix4fv[12] = HEAP_FLOAT[index + 12];
+                    this.buffer_matrix4fv[13] = HEAP_FLOAT[index + 13];
+                    this.buffer_matrix4fv[14] = HEAP_FLOAT[index + 14];
+                    this.buffer_matrix4fv[15] = HEAP_FLOAT[index + 15];
+                    return this.buffer_matrix4fv;
+                }
+
+
+
+			}
+
+			class ViewSliceCacher{
+
+			    constructor(wasm){
+			        // HEAP_DOUBLE
+				}
+
+
+
+
+			}
+
+
+
+			let webglConverter = new OpaqueWebglConverter();
+			// let webglProgramConverter = new OpaqueWebglConverter();
+			// let webglUniformConverter = new OpaqueWebglConverter();
+			let tempBufferView = new TempBufferViews();
+
 			let methods = {};
 			for(let i = 0; i < method_names.length; i++){
 				methods[method_names[i]] = () => {
-					// console.log(method_names[i] + " " + "called")
+					console.log(method_names[i] + " " + "called")
 				}
 			}
+
+			let context = null;
+
+
+            let utf8decoder = new TextDecoder(); // default 'utf-8' or 'utf8'
+			function nullTerminatedString(strPtr){
+			    let end = strPtr;
+			    while(HEAP_CHAR[end] !== 0){
+                    end += 1;
+				}
+                return utf8decoder.decode(HEAP_CHAR.subarray(strPtr, end))
+            }
+
+            methods["glBindBuffer"] = (target, buffer) => {
+			    context.bindBuffer(target, webglConverter.get(buffer))
+			};
+
+			methods["glGetUniformLocation"] = (program_id, strPtr) => {
+			    let str = nullTerminatedString(strPtr);
+			    return webglConverter.convert(context.getUniformLocation(webglConverter.get(program_id), str));
+			};
+
+			methods["glClearColor"] = (red, green, blue, alpha) => {
+				context.clearColor(red, green, blue, alpha);
+			};
+			methods["glAttachShader"] = (program_id, shader_id) => {
+				context.attachShader(webglConverter.get(program_id), webglConverter.get(shader_id))
+			};
+			methods["emscripten_webgl_make_context_current"] = () => {
+                let contextAttributes = {
+                    // alpha: _alpha,
+                    depth: 1,
+                    stencil: 1,
+                    antialias: 1,
+                    // premultipliedAlpha: _premultipliedAlpha,
+                    // preserveDrawingBuffer: _preserveDrawingBuffer,
+                    // powerPreference: _powerPreference
+                };
+                context = document.getElementById("wasmCanvas").getContext('webgl2', contextAttributes);
+                console.log(context);
+                return 1;
+
+
+			};
+			methods["emscripten_webgl_create_context"] = () => {
+
+			};
+			methods["glGetShaderInfoLog"] = () => {
+				throw new Error("UNIMPLEMENTED");
+			};
+			methods["glCompileShader"] = (shader_id) => {
+                context.compileShader(webglConverter.get(shader_id))
+			};
+			methods["glShaderSource"] = (shader_id, count, dblPtrString, length) => { //assume length is zero and count is 1 i.e. null terminated
+			    console.assert(count === 1 && length === 0);
+			    let src = nullTerminatedString(HEAP_INT[dblPtrString >> 2]);
+			    console.log(src);
+                context.shaderSource(webglConverter.get(shader_id), src);
+			};
+			methods["glCreateShader"] = (type) => {
+			    return webglConverter.convert(context.createShader(type))
+			};
+			methods["glDrawElements"] = (mode, count, type, indices) => {
+			    context.drawElements(mode, count, type, indices)
+			};
+			methods["glBufferData"] = (target, size, dataPtr, usage) => {
+			    //warning generates garbage
+			    context.bufferData(target, new DataView(HEAP_RAW_BUFFER, dataPtr, size), usage)
+			};
+			methods["tan"] = (x) => {
+				return Math.tan(x);
+			};
+			methods["glGenBuffers"] = (n, bufferPtr) => {
+			    console.assert(n === 1);
+                let opaqueHandle = context.createBuffer();
+                HEAP_INT[bufferPtr >> 2] = webglConverter.convert(opaqueHandle);
+			};
+			methods["glCullFace"] = (mode) => {
+				context.cullFace(mode);
+			};
+			methods["glEnable"] = (cap) => {
+                context.enable(cap);
+			};
+			methods["glUniform3fv"] = (location, count, ptr) => {
+			    // console.log(location);
+				context.uniform3fv(webglConverter.get(location), tempBufferView.getView3fv(ptr))
+			};
+            methods["glUniformMatrix4fv"] = (location, count, tranpose, ptr) => {
+                context.uniformMatrix4fv(webglConverter.get(location), tranpose, tempBufferView.getViewMat4fv(ptr))
+            };
+			methods["glEnableVertexAttribArray"] = (index) => {
+				context.enableVertexAttribArray(index)
+			};
+			methods["glVertexAttribPointer"] = (index, size, type, normalized, stride, offset) => {
+                context.vertexAttribPointer(index, size, type, normalized, stride, offset)
+			};
+			methods["glUseProgram"] = (program_id) => {
+				context.useProgram(webglConverter.get(program_id))
+			};
+			methods["glClear"] = (mask) => {
+                context.clear(mask)
+			};
+			methods["glViewport"] = (x, y, width, height) => {
+				context.viewport(x, y, width, height)
+			};
+			methods["glDeleteProgram"] = () => {
+
+			};
+			methods["glGetProgramInfoLog"] = () => {
+                throw new Error("UNIMPLEMENTED");
+			};
+			methods["glGetProgramiv"] = () => {
+				throw new Error("UNIMPLEMENTED");
+			};
+			methods["glLinkProgram"] = (program_id) => {
+                context.linkProgram(webglConverter.get(program_id));
+            };
+			methods["glBindAttribLocation"] = (program_id, index, namePtr) => {
+			    let name = nullTerminatedString(namePtr);
+			    console.log(name);
+			    context.bindAttribLocation(webglConverter.get(program_id), index, name);
+
+			};
+			methods["glCreateProgram"] = () => {
+                let opaqueHandle = context.createProgram();
+                return webglConverter.convert(opaqueHandle);
+			};
+			methods["glDeleteShader"] = () => {
+
+			};
+
 
 			methods["console_log"] = (code) => {
 				console.log(code);
@@ -89,9 +299,9 @@
 			methods["console_error"] = (code) => {
 				console.log(code);
 
-				if(code == 0){
-					throw new Error("NO CONTEXT");
-				}
+				// if(code == 0){
+				// 	throw new Error("NO CONTEXT");
+				// }
 				// if(code == ){
 				// 	// throw new Error("MAP KEY NOT FOUND");
 				// 	console.log("MAP KEY NOT FOUND");
@@ -100,9 +310,9 @@
 				// }
 			}
 
-			methods["glCreateProgram"] = (code) => {
-				return 1;
-			}
+			// methods["glCreateProgram"] = (code) => {
+			// 	return 1;
+			// }
 			// methods["emscripten_webgl_make_context_current"] = (code) => {
 			// 	return 1;
 			// }
@@ -124,8 +334,10 @@
 
 			let memory = instance.exports.memory;
 			let HEAP_RAW_BUFFER = memory.buffer;
+			let HEAP_INT = new Uint32Array(memory.buffer);
 			let HEAP_CHAR = new Uint8Array(memory.buffer);
 			let HEAP_DOUBLE = new Float64Array(memory.buffer);
+			let HEAP_FLOAT = new Float32Array(memory.buffer);
 			initGui();
 
 
@@ -194,7 +406,7 @@
 
 					this.pointer = pointer;
 
-					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 3 );
+					var elements = new Float32Array( HEAP_RAW_BUFFER, this.pointer, 3 );
 
 					elements[ 0 ] = this.x;
 					elements[ 1 ] = this.y;
@@ -221,7 +433,7 @@
 					THREE.Quaternion.call( this, x, y, z );
 
 					this.pointer = pointer;
-					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 4 );
+					var elements = new Float32Array( HEAP_RAW_BUFFER, this.pointer, 4 );
 
 					elements[ 0 ] = this.x;
 					elements[ 1 ] = this.y;
@@ -250,7 +462,7 @@
 
 					this.pointer = pointer;
 
-					var elements = new Float64Array( HEAP_RAW_BUFFER, this.pointer, 16 );
+					var elements = new Float32Array( HEAP_RAW_BUFFER, this.pointer, 16 );
 
 					for ( var i = 0; i < 16; i ++ ) {
 
@@ -283,20 +495,20 @@
 					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var rotation = new THREE.Euler();
 					var quaternion = new THREE.QuaternionEx( offset );
-					offset += 4 * 8;
+					offset += 4 << 2;
 
 					var scale = new THREE.Vector3Ex( offset, 1, 1, 1 );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var matrix = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					var matrixWorld = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					function onRotationChange() {
 
@@ -370,20 +582,20 @@
 					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var rotation = new THREE.Euler();
 					var quaternion = new THREE.QuaternionEx( offset );
-					offset += 4 * 8;
+					offset += 4 << 2;
 
 					var scale = new THREE.Vector3Ex( offset, 1, 1, 1 );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var matrix = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					var matrixWorld = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					function onRotationChange() {
 
@@ -458,20 +670,20 @@
 					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var rotation = new THREE.Euler();
 					var quaternion = new THREE.QuaternionEx( offset );
-					offset += 4 * 8;
+					offset += 4 << 2;
 
 					var scale = new THREE.Vector3Ex( offset, 1, 1, 1 );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var matrix = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					var matrixWorld = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					function onRotationChange() {
 
@@ -555,20 +767,20 @@
 					var offset = WASM.Object3D_getPositionPointer( this.pointer );
 
 					var position = new THREE.Vector3Ex( offset );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var rotation = new THREE.Euler();
 					var quaternion = new THREE.QuaternionEx( offset );
-					offset += 4 * 8;
+					offset += 4 << 2;
 
 					var scale = new THREE.Vector3Ex( offset, 1, 1, 1 );
-					offset += 3 * 8;
+					offset += 3 << 2;
 
 					var matrix = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					var matrixWorld = new THREE.Matrix4Ex( offset );
-					offset += 16 * 8;
+					offset += 16 << 2;
 
 					function onRotationChange() {
 
@@ -763,6 +975,7 @@
 
 			function init() {
 
+
 				var id = 'wasmCanvas';
 				var width = window.innerWidth;
 				var height = window.innerHeight;
@@ -772,13 +985,16 @@
 				canvas.height = height;
 				document.body.appendChild( canvas );
 
-				renderer = new THREE[ 'WebGLRenderer' + ( useWasm ? 'Ex' : '' ) ]( {
+
+                WASM.initGl();
+
+                renderer = new THREE[ 'WebGLRenderer' + ( useWasm ? 'Ex' : '' ) ]( {
 					canvas: canvas,
 					antialias: antialias
 				} );
 
 				renderer.setSize( width, height );
-				renderer.setClearColor( new THREE.Color( 0xffffff ), 1.0 );
+				renderer.setClearColor( new THREE.Color( 0xffddff ), 1.0 );
 
 				scene = new THREE[ 'Scene' + ( useWasm ? 'Ex' : '' ) ]();
 

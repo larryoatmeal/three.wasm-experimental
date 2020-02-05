@@ -3,27 +3,27 @@
 Box3::Box3() {}
 
 bool Box3::isEmpty() {
-	return (this->max.x < this->min.x) ||
-		(this->max.y < this->min.y) ||
-		(this->max.z < this->min.z);
+	return (this->max.elements[0] < this->min.elements[0]) ||
+		(this->max.elements[1] < this->min.elements[1]) ||
+		(this->max.elements[2] < this->min.elements[2]);
 }
 
 Box3* Box3::setFromBufferAttribute(
 	BufferAttribute *attribute
 ) {
-	double largeValue = 1000000.0; // Fix me
-	double minX = largeValue;
-	double minY = largeValue;
-	double minZ = largeValue;
+	float largeValue = 1000000.0; // Fix me
+	float minX = largeValue;
+	float minY = largeValue;
+	float minZ = largeValue;
 
-	double maxX = -largeValue;
-	double maxY = -largeValue;
-	double maxZ = -largeValue;
+	float maxX = -largeValue;
+	float maxY = -largeValue;
+	float maxZ = -largeValue;
 
 	for(int i = 0, il = attribute->count; i < il; ++i) {
-		double x = (double)attribute->getXAsFloat(i);
-		double y = (double)attribute->getYAsFloat(i);
-		double z = (double)attribute->getZAsFloat(i);
+		float x = (float)attribute->getXAsFloat(i);
+		float y = (float)attribute->getYAsFloat(i);
+		float z = (float)attribute->getZAsFloat(i);
 
 		if(x < minX) minX = x;
 		if(y < minY) minY = y;

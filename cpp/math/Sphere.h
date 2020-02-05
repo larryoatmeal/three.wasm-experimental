@@ -7,7 +7,7 @@
 class Sphere {
 public:
 	Vector3 center;
-	double radius;
+	float radius;
 
 	Sphere();
 

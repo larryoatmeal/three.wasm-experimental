@@ -42,23 +42,24 @@ GLuint loadShader(
 	glShaderSource(shader, 1, &code, 0);
 	glCompileShader(shader);
 
-	GLint compiled;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-
-	if(compiled == 0) {
-		GLint infoLen = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-
-		if(infoLen > 1) {
-			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
-			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
-			//printf("Error compiling code\n%s\n", infoLog);
-			free(infoLog);
-		}
-
-		glDeleteShader(shader);
-		return 0;
-	}
+//IGNORE ERRORS FOR NOW
+//	GLint compiled;
+//	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+//
+//	if(compiled == 0) {
+//		GLint infoLen = 0;
+//		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+//
+//		if(infoLen > 1) {
+//			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
+//			glGetShaderInfoLog(shader, infoLen, 0, infoLog);
+//			//printf("Error compiling code\n%s\n", infoLog);
+//			free(infoLog);
+//		}
+//
+//		glDeleteShader(shader);
+//		return 0;
+//	}
 
 	return shader;
 }
@@ -103,25 +104,25 @@ GLuint WebGLRenderer::compileShader() {
 	this->uniformLocationMap.put(UNIFORM_projectionMatrix, glGetUniformLocation(program, "projectionMatrix"));
 	this->uniformLocationMap.put(UNIFORM_color, glGetUniformLocation(program, "color"));
 
-	GLint linked;
-
-	glGetProgramiv(program, GL_LINK_STATUS, &linked);
-
-	if(linked == 0) {
-
-		GLint infoLen = 0;
-		glGetShaderiv(program, GL_INFO_LOG_LENGTH, &infoLen);
-
-		if(infoLen > 1) {
-			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
-			glGetProgramInfoLog(program, infoLen, 0, infoLog);
-			//printf("Error linking program:\n%s\n", infoLog);
-			free(infoLog);
-		}
-
-		glDeleteProgram(program);
-		return 0;
-	}
+//	GLint linked;
+//
+//	glGetProgramiv(program, GL_LINK_STATUS, &linked);
+//
+//	if(linked == 0) {
+//
+//		GLint infoLen = 0;
+//		glGetShaderiv(program, GL_INFO_LOG_LENGTH, &infoLen);
+//
+//		if(infoLen > 1) {
+//			char *infoLog = (char*)malloc(sizeof(char) * infoLen);
+//			glGetProgramInfoLog(program, infoLen, 0, infoLog);
+//			//printf("Error linking program:\n%s\n", infoLog);
+//			free(infoLog);
+//		}
+//
+//		glDeleteProgram(program);
+//		return 0;
+//	}
 
 	return program;
 }
@@ -210,7 +211,7 @@ void WebGLRenderer::projectObject(
 				->applyMatrix4(&this->projScreenMatrix);
 			struct RenderItem entry;
 			entry.object = node;
-			entry.z = this->tmpVector3.z;
+			entry.z = this->tmpVector3.elements[2];
 			this->currentRenderList.push_back(entry);
 			this->geometries->update(((Mesh*)node)->geometry);
 		}
@@ -254,11 +255,7 @@ void WebGLRenderer::renderObject(
 	}
 
 	if(refreshProgram || camera != this->currentCamera) {
-		GLfloat projectionMatrixElements[16];
-		for(int i = 0; i < 16; ++i) {
-			projectionMatrixElements[i] = camera->projectionMatrix.elements[i];
-		}
-		glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_projectionMatrix), 1, GL_FALSE, projectionMatrixElements);
+		glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_projectionMatrix), 1, GL_FALSE, camera->projectionMatrix.elements);
 		this->currentCamera = camera;
 	}
 
@@ -293,17 +290,8 @@ void WebGLRenderer::renderObject(
 		drawCount = mesh->geometry->getAttribute(POSITION_ATTRIBUTE)->count;
 	}
 
-	GLfloat modelViewMatrixElements[16];
-	for(int i = 0; i < 16; ++i) {
-		modelViewMatrixElements[i] = (GLfloat)object->modelViewMatrix.elements[i];
-	}
-	glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_modelViewMatrix), 1, GL_FALSE, modelViewMatrixElements);
-
-	GLfloat colorElements[3];
-	colorElements[0] = color->x;
-	colorElements[1] = color->y;
-	colorElements[2] = color->z;
-	glUniform3fv(this->uniformLocationMap.get(UNIFORM_color), 1, colorElements);
+	glUniformMatrix4fv(this->uniformLocationMap.get(UNIFORM_modelViewMatrix), 1, GL_FALSE, object->modelViewMatrix.elements);
+	glUniform3fv(this->uniformLocationMap.get(UNIFORM_color), 1, color->elements);
 
 	this->renderer.render(drawStart, drawCount);
 }

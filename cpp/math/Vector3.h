@@ -4,26 +4,29 @@
 #include <math.h>
 #include "Matrix4.h"
 
+
+
+
 class Matrix4;
 
 class Vector3 {
 public:
-	double x;
-	double y;
-	double z;
+
+
+    float elements[3];
 
 	Vector3();
 
 	Vector3(
-		double _x,
-		double _y,
-		double _z
+		float _x,
+		float _y,
+		float _z
 	);
 
 	Vector3* set(
-		double _x,
-		double _y,
-		double _z
+		float _x,
+		float _y,
+		float _z
 	);
 
 	Vector3* copy(
@@ -43,16 +46,16 @@ public:
 	);
 
 	Vector3* multiplyScalar(
-		double scalar
+		float scalar
 	);
 
-	double dot(
+	float dot(
 		Vector3 *v
 	);
 
-	double length();
+	float length();
 
-	double distanceToSquared(
+	float distanceToSquared(
 		Vector3* v
 	);
 

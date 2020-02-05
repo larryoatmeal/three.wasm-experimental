@@ -45,39 +45,39 @@ Matrix4* Matrix4::multiplyMatrices(
 	struct Matrix4 *a,
 	struct Matrix4 *b
 ) {
-	double a11 = a->elements[0];
-	double a12 = a->elements[4];
-	double a13 = a->elements[8];
-	double a14 = a->elements[12];
-	double a21 = a->elements[1];
-	double a22 = a->elements[5];
-	double a23 = a->elements[9];
-	double a24 = a->elements[13];
-	double a31 = a->elements[2];
-	double a32 = a->elements[6];
-	double a33 = a->elements[10];
-	double a34 = a->elements[14];
-	double a41 = a->elements[3];
-	double a42 = a->elements[7];
-	double a43 = a->elements[11];
-	double a44 = a->elements[15];
+	float a11 = a->elements[0];
+	float a12 = a->elements[4];
+	float a13 = a->elements[8];
+	float a14 = a->elements[12];
+	float a21 = a->elements[1];
+	float a22 = a->elements[5];
+	float a23 = a->elements[9];
+	float a24 = a->elements[13];
+	float a31 = a->elements[2];
+	float a32 = a->elements[6];
+	float a33 = a->elements[10];
+	float a34 = a->elements[14];
+	float a41 = a->elements[3];
+	float a42 = a->elements[7];
+	float a43 = a->elements[11];
+	float a44 = a->elements[15];
 
-	double b11 = b->elements[0];
-	double b12 = b->elements[4];
-	double b13 = b->elements[8];
-	double b14 = b->elements[12];
-	double b21 = b->elements[1];
-	double b22 = b->elements[5];
-	double b23 = b->elements[9];
-	double b24 = b->elements[13];
-	double b31 = b->elements[2];
-	double b32 = b->elements[6];
-	double b33 = b->elements[10];
-	double b34 = b->elements[14];
-	double b41 = b->elements[3];
-	double b42 = b->elements[7];
-	double b43 = b->elements[11];
-	double b44 = b->elements[15];
+	float b11 = b->elements[0];
+	float b12 = b->elements[4];
+	float b13 = b->elements[8];
+	float b14 = b->elements[12];
+	float b21 = b->elements[1];
+	float b22 = b->elements[5];
+	float b23 = b->elements[9];
+	float b24 = b->elements[13];
+	float b31 = b->elements[2];
+	float b32 = b->elements[6];
+	float b33 = b->elements[10];
+	float b34 = b->elements[14];
+	float b41 = b->elements[3];
+	float b42 = b->elements[7];
+	float b43 = b->elements[11];
+	float b44 = b->elements[15];
 
 	this->elements[0] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
 	this->elements[4] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
@@ -107,30 +107,30 @@ Matrix4* Matrix4::compose(
 	struct Quaternion *quaternion,
 	struct Vector3 *scale
 ) {
-	double x = quaternion->x;
-	double y = quaternion->y;
-	double z = quaternion->z;
-	double w = quaternion->w;
+	float x = quaternion->x;
+	float y = quaternion->y;
+	float z = quaternion->z;
+	float w = quaternion->w;
 
-	double x2 = x + x;
-	double y2 = y + y;
-	double z2 = z + z;
+	float x2 = x + x;
+	float y2 = y + y;
+	float z2 = z + z;
 
-	double xx = x * x2;
-	double xy = x * y2;
-	double xz = x * z2;
+	float xx = x * x2;
+	float xy = x * y2;
+	float xz = x * z2;
 
-	double yy = y * y2;
-	double yz = y * z2;
-	double zz = z * z2;
+	float yy = y * y2;
+	float yz = y * z2;
+	float zz = z * z2;
 
-	double wx = w * x2;
-	double wy = w * y2;
-	double wz = w * z2;
+	float wx = w * x2;
+	float wy = w * y2;
+	float wz = w * z2;
 
-	double sx = scale->x;
-	double sy = scale->y;
-	double sz = scale->z;
+	float sx = scale->elements[0];
+	float sy = scale->elements[1];
+	float sz = scale->elements[2];
 
 	this->elements[0] = (1.0 - (yy + zz)) * sx;
 	this->elements[1] = (xy + wz) * sx;
@@ -147,9 +147,9 @@ Matrix4* Matrix4::compose(
         this->elements[10] = (1.0 - (xx + yy)) * sz;
         this->elements[11] = 0.0;
 
-        this->elements[12] = position->x;
-        this->elements[13] = position->y;
-        this->elements[14] = position->z;
+        this->elements[12] = position->elements[0];
+        this->elements[13] = position->elements[1];
+        this->elements[14] = position->elements[2];
         this->elements[15] = 1.0;
 
 	return this;
@@ -158,29 +158,29 @@ Matrix4* Matrix4::compose(
 Matrix4* Matrix4::getInverse(
 	Matrix4 *m
 ) {
-	double n11 = m->elements[0];
-	double n21 = m->elements[1];
-	double n31 = m->elements[2];
-	double n41 = m->elements[3];
-	double n12 = m->elements[4];
-	double n22 = m->elements[5];
-	double n32 = m->elements[6];
-	double n42 = m->elements[7];
-	double n13 = m->elements[8];
-	double n23 = m->elements[9];
-	double n33 = m->elements[10];
-	double n43 = m->elements[11];
-	double n14 = m->elements[12];
-	double n24 = m->elements[13];
-	double n34 = m->elements[14];
-	double n44 = m->elements[15];
+	float n11 = m->elements[0];
+	float n21 = m->elements[1];
+	float n31 = m->elements[2];
+	float n41 = m->elements[3];
+	float n12 = m->elements[4];
+	float n22 = m->elements[5];
+	float n32 = m->elements[6];
+	float n42 = m->elements[7];
+	float n13 = m->elements[8];
+	float n23 = m->elements[9];
+	float n33 = m->elements[10];
+	float n43 = m->elements[11];
+	float n14 = m->elements[12];
+	float n24 = m->elements[13];
+	float n34 = m->elements[14];
+	float n44 = m->elements[15];
 
-	double t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
-	double t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
-	double t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
-	double t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+	float t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
+	float t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
+	float t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
+	float t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
 
-	double det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+	float det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
 
 	if ( det == 0.0 ) {
 
@@ -189,7 +189,7 @@ Matrix4* Matrix4::getInverse(
 
 	}
 
-	double detInv = 1.0 / det;
+	float detInv = 1.0 / det;
 
 	this->elements[0] = t11 * detInv;
 	this->elements[1] = ( n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44 ) * detInv;
@@ -215,20 +215,20 @@ Matrix4* Matrix4::getInverse(
 }
 
 Matrix4* Matrix4::makePerspective(
-	double left,
-	double right,
-	double top,
-	double bottom,
-	double near,
-	double far
+	float left,
+	float right,
+	float top,
+	float bottom,
+	float near,
+	float far
 ) {
-	double x = 2.0 * near / ( right - left );
-	double y = 2.0 * near / ( top - bottom );
+	float x = 2.0 * near / ( right - left );
+	float y = 2.0 * near / ( top - bottom );
 
-	double a = ( right + left ) / ( right - left );
-	double b = ( top + bottom ) / ( top - bottom );
-	double c = - ( far + near ) / ( far - near );
-	double d = - 2 * far * near / ( far - near );
+	float a = ( right + left ) / ( right - left );
+	float b = ( top + bottom ) / ( top - bottom );
+	float c = - ( far + near ) / ( far - near );
+	float d = - 2 * far * near / ( far - near );
 
 	this->elements[0] = x;
 	this->elements[4] = 0.0;
@@ -250,17 +250,17 @@ Matrix4* Matrix4::makePerspective(
 	return this;
 }
 
-double Matrix4::getMaxScaleOnAxis() {
-	double scaleXSq = this->elements[0] * this->elements[0] +
+float Matrix4::getMaxScaleOnAxis() {
+	float scaleXSq = this->elements[0] * this->elements[0] +
 		this->elements[1] * this->elements[1] +
 		this->elements[2] * this->elements[2];
-	double scaleYSq = this->elements[4] * this->elements[4] +
+	float scaleYSq = this->elements[4] * this->elements[4] +
 		this->elements[5] * this->elements[5] +
 		this->elements[6] * this->elements[6];
-	double scaleZSq = this->elements[8] * this->elements[8] +
+	float scaleZSq = this->elements[8] * this->elements[8] +
 		this->elements[9] * this->elements[9] +
 		this->elements[10] * this->elements[10];
 
-	double max = scaleXSq >= scaleYSq ? scaleXSq : scaleYSq;
+	float max = scaleXSq >= scaleYSq ? scaleXSq : scaleYSq;
 	return sqrt(max >= scaleZSq ? max : scaleZSq);
 }

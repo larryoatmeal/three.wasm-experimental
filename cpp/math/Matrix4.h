@@ -9,7 +9,7 @@ class Vector3;
 
 class Matrix4 {
 public:
-	double elements[16];
+	float elements[16];
 
 	Matrix4();
 
@@ -33,15 +33,15 @@ public:
 	);
 
 	Matrix4* makePerspective(
-		double left,
-		double right,
-		double top,
-		double bottom,
-		double near,
-		double far
+		float left,
+		float right,
+		float top,
+		float bottom,
+		float near,
+		float far
 	);
 
-	double getMaxScaleOnAxis();
+	float getMaxScaleOnAxis();
 };
 
 #endif

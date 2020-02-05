@@ -44,9 +44,14 @@ BufferGeometry* BufferGeometry::computeBoundingSphere() {
 	double maxRadiusSq = 0.0;
 
 	for(int i = 0, il = position->count; i < il; ++i) {
-		vector.x = (double)position->getXAsFloat(i);
-		vector.y = (double)position->getYAsFloat(i);
-		vector.z = (double)position->getZAsFloat(i);
+
+		vector.set(
+		    position->getXAsFloat(i),
+            position->getYAsFloat(i),
+		    position->getZAsFloat(i)
+        );
+
+
 		double distanceSq = this->boundingSphere->center.distanceToSquared(&vector);
 		maxRadiusSq = maxRadiusSq >= distanceSq ? maxRadiusSq : distanceSq;
 	}

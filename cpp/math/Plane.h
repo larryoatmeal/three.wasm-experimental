@@ -6,20 +6,20 @@
 class Plane {
 public:
 	Vector3 normal;
-	double constant;
+	float constant;
 
 	Plane();
 
 	Plane* setComponents(
-		double x,
-		double y,
-		double z,
-		double w
+		float x,
+		float y,
+		float z,
+		float w
 	);
 
 	Plane* normalize();
 
-	double distanceToPoint(
+	float distanceToPoint(
 		Vector3 *point
 	);
 };

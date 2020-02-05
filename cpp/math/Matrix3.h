@@ -5,7 +5,7 @@
 
 class Matrix3 {
 public:
-	double elements[9];
+	float elements[9];
 
 	Matrix3();
 
